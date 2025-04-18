@@ -13,6 +13,8 @@ let btnView;
 let btnEdit;
 let btnDelete;
 
+let currentCard = null;
+
 const actuElemets = () => {
     newNote = document.getElementById('newNote');
 
@@ -83,15 +85,51 @@ const newNoteResetMode = () => {
 
 const addN = () => {
     btnAdd.addEventListener('click', () => {
-        const title = titleNote.value;
+        let title = titleNote.value;
         const text = textNote.value;
         
-        const card = createCard(title, text);
-        cardList.appendChild(card);
-        
-        titleNote.value = '';
-        textNote.value = '';
-        viewEditMode([textNote, titleNote], 'edit');
+        if (text.trim() !== "") {
+            // nombre por defecto si no hay titulo
+            if (title.trim() === "") {
+                title = `Nota de texto - ${new Date().toLocaleDateString()}`;
+            }
+            
+            if (currentCard) {
+                // Si estamos editando, actualizar la card existente
+                const titleElement = currentCard.querySelector('.title');
+                const textElement = currentCard.querySelector('.card-text');
+                
+                titleElement.textContent = title;
+                textElement.textContent = text;
+                
+                currentCard = null;
+            } else {
+                // Si no estamos editando, crear una nueva card
+                const card = createCard(title, text);
+                cardList.appendChild(card);
+            }
+            
+            titleNote.value = '';
+            textNote.value = '';
+            viewEditMode([textNote, titleNote], 'edit');
+        } else {
+            alert('El texto no puede estar vacio');
+        }
+    });
+}
+
+const editN = () => {
+    cardList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btnEdit')) {
+            // le da valor a currentCard
+            currentCard = e.target.closest('.container-card');
+            const titleElement = currentCard.querySelector('.title');
+            const textElement = currentCard.querySelector('.card-text');
+            
+            titleNote.value = titleElement.textContent;
+            textNote.value = textElement.textContent;
+            viewEditMode([textNote, titleNote], 'edit');
+        }
     });
 }
 
@@ -126,6 +164,7 @@ const setupEventListeners = () => {
     newNoteResetMode();
     addN();
     view();
+    editN();
     deleteN();
 }
 
@@ -137,5 +176,5 @@ const initApp = () => {
     viewEditMode([textNote, titleNote], 'edit');
 }
 
-// Iniciar la aplicación cuando el DOM este listo
+// Iniciar la aplicacion cuando el DOM este listo
 document.addEventListener('DOMContentLoaded', initApp);
