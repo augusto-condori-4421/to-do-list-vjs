@@ -9,10 +9,6 @@ let btnAdd;
 let btnCerrar;
 let btnDescartar
 
-let btnView;
-let btnEdit;
-let btnDelete;
-
 let currentCard = null;
 
 const actuElemets = () => {
@@ -25,10 +21,6 @@ const actuElemets = () => {
     btnCerrar = document.getElementById('btn-cerrar');
     btnDescartar = document.getElementById('btn-descartar');
     btnAdd = document.getElementById('addNote');
-
-    btnView = document.querySelectorAll('.btnView');
-    btnEdit = document.querySelectorAll('.btnEdit');
-    btnDelete = document.querySelectorAll('.btnDelete');
 }
 
 const createCard = (title, text) => {
@@ -53,7 +45,9 @@ const createCard = (title, text) => {
     return container;
 }
 
-const viewEditMode = (inputs = [textNote, titleNote], mode = 'view') => {
+// Cambia entre el modo ver y modo editar del modal
+const viewEditMode = (mode) => {
+    const inputs = [textNote, titleNote];
     inputs.forEach(input => {
         if (mode === 'view') {
             input.setAttribute('readonly', true);
@@ -79,7 +73,7 @@ const newNoteResetMode = () => {
     newNote.addEventListener('click', () => {
         titleNote.value = '';
         textNote.value = '';
-        viewEditMode([textNote, titleNote], 'edit');
+        viewEditMode('edit');
     })
 }
 
@@ -111,11 +105,19 @@ const addN = () => {
             
             titleNote.value = '';
             textNote.value = '';
-            viewEditMode([textNote, titleNote], 'edit');
+            viewEditMode('edit');
         } else {
             alert('El texto no puede estar vacio');
         }
     });
+}
+
+// Carga los datos de la card en el modal
+const cardDataInModal = (card) => {
+    const titleElement = card.querySelector('.title');
+    const textElement = card.querySelector('.card-text');
+    titleNote.value = titleElement.textContent;
+    textNote.value = textElement.textContent;
 }
 
 const editN = () => {
@@ -123,12 +125,8 @@ const editN = () => {
         if (e.target.classList.contains('btnEdit')) {
             // le da valor a currentCard
             currentCard = e.target.closest('.container-card');
-            const titleElement = currentCard.querySelector('.title');
-            const textElement = currentCard.querySelector('.card-text');
-            
-            titleNote.value = titleElement.textContent;
-            textNote.value = textElement.textContent;
-            viewEditMode([textNote, titleNote], 'edit');
+            cardDataInModal(currentCard);
+            viewEditMode('edit');
         }
     });
 }
@@ -137,9 +135,7 @@ const deleteN = () => {
     cardList.addEventListener('click', (e) => {
         if (e.target.classList.contains('btnDelete')) {
             const card = e.target.closest('.container-card');
-            if (card) {
-                if (confirm("¿Estas seguro que desea eliminar la nota?")) card.remove()
-            }
+            if (confirm("¿Estas seguro que desea eliminar la nota?")) card.remove()
         }
     });
 }
@@ -148,13 +144,8 @@ const view = () => {
     cardList.addEventListener('click', (e) => {
         if (e.target.classList.contains('btnView')) {
             const card = e.target.closest('.container-card');
-            const titleElement = card.querySelector('.title');
-            const textElement = card.querySelector('.card-text');
-            
-            titleNote.value = titleElement.textContent;
-            textNote.value = textElement.textContent;
-            
-            viewEditMode([textNote, titleNote], 'view');
+            cardDataInModal(card);
+            viewEditMode('view');
         }
     });
 }
@@ -173,7 +164,7 @@ const initApp = () => {
     actuElemets();
     setupEventListeners();
     // Inicializar en modo edit por defecto
-    viewEditMode([textNote, titleNote], 'edit');
+    viewEditMode('edit');
 }
 
 // Iniciar la aplicacion cuando el DOM este listo
